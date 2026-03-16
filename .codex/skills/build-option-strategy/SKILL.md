@@ -16,6 +16,8 @@ Use this skill to design or implement an option trading strategy system in a pla
 2. Load references only when they are needed.
    - Read [architecture-patterns.md](references/architecture-patterns.md) to choose service boundaries and module placement.
    - Read [schema-and-persistence.md](references/schema-and-persistence.md) to design storage, replay, and audit flows.
+   - Read [ctp-gateway-connection-patterns.md](references/ctp-gateway-connection-patterns.md) only when the target venue is CTP or a CTP-like futures gateway and you need concrete connection, session, recovery, and cancel-identity guidance.
+   - Read [postgresql-schema-patterns.md](references/postgresql-schema-patterns.md) only when the target repository is explicitly on PostgreSQL and you need concrete physical schema patterns for bars, signals, or order and trade storage.
    - Read [example-optionforge.md](references/example-optionforge.md) only if you need a concrete repository mapping example.
 3. Keep the implementation generic until the repository or API proves otherwise. Do not assume a specific framework, broker, or event engine.
 
@@ -40,6 +42,9 @@ Use this skill to design or implement an option trading strategy system in a pla
 
 - Model read paths first: live trading, warm restart, replay, monitoring, and post-trade analytics.
 - Separate static contract metadata, market facts, derived analytics, execution facts, and restart snapshots.
+- Treat bar history as shared market facts instead of per-strategy copies unless strategy-local transforms are the real source of truth.
+- In replay-first systems, prefer recording every signal evaluation, not only executable signals.
+- Treat orders and trades as a logical slice that often maps to order events, trade fills, and recovery projections instead of one physical table.
 - Use append-only event storage when auditability or replay matters.
 - Use snapshots only for fast recovery or read-optimized projections.
 - Version persisted state intentionally when strategy behavior depends on it.
@@ -50,6 +55,7 @@ Use this skill to design or implement an option trading strategy system in a pla
 - Normalize market data, order status, trade events, and account state as soon as they cross the boundary.
 - Preserve raw payload fragments when vendor mappings are unstable or audit requirements are high.
 - Handle reconnects, duplicate callbacks, and partial fills as normal conditions, not edge cases.
+- For CTP-like gateways, model trade readiness and market-data readiness separately, and gate order submission on recovered trade state instead of first login success.
 - Do not put selection, signal, or risk logic inside broker adapters.
 
 ### Build the contract universe
@@ -80,9 +86,12 @@ Use this skill to design or implement an option trading strategy system in a pla
 
 - Persist the minimum state needed for safe restart.
 - Persist the full event trail when replay, audit, or analytics require it.
+- Reuse shared bar history across strategies whenever replay and indicator warmup can read the same normalized facts.
+- Keep recovery projections separate from append-only order and trade facts.
 - Keep monitoring projections separate from restart state.
-- Store enough context to reproduce why a signal or hedge fired.
+- Store enough context to reproduce why a signal or hedge fired, including hold or blocked outcomes when later behavior depends on prior reasoning.
 - If replay inputs are cheap to recompute, prefer recomputation over storing every derived field.
+- If PostgreSQL is the target, use [postgresql-schema-patterns.md](references/postgresql-schema-patterns.md) as an optional physical-design appendix, not as a portability requirement.
 
 ### Verify the implementation
 
@@ -111,4 +120,6 @@ Use this skill to design or implement an option trading strategy system in a pla
 
 - Use [architecture-patterns.md](references/architecture-patterns.md) for common module boundaries.
 - Use [schema-and-persistence.md](references/schema-and-persistence.md) for storage and replay design.
+- Use [ctp-gateway-connection-patterns.md](references/ctp-gateway-connection-patterns.md) only as an optional CTP appendix for trade and market-data session sequencing, recovery, and cancel identity guidance.
+- Use [postgresql-schema-patterns.md](references/postgresql-schema-patterns.md) only as an optional PostgreSQL appendix for concrete physical schema patterns.
 - Use [example-optionforge.md](references/example-optionforge.md) only as an optional mapping example.

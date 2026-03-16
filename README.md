@@ -97,6 +97,7 @@ Copy:
 - "Design a schema for option contracts, quotes, greeks, orders, trades, and restart snapshots."
 - "Help me build contract filtering and ranking logic for weekly index options."
 - "Design gateway boundaries for broker callbacks, order normalization, and replay-safe persistence."
+- "Design CTP trade and market-data gateway connection, recovery, and cancel boundaries."
 - "Implement a signal pipeline for volatility regime changes with structured decision output."
 
 ## References
@@ -104,9 +105,13 @@ Copy:
 Inside the canonical skill:
 
 - `references/architecture-patterns.md`
+- `references/ctp-gateway-connection-patterns.md`
 - `references/schema-and-persistence.md`
+- `references/postgresql-schema-patterns.md`
 - `references/example-optionforge.md`
 
+`ctp-gateway-connection-patterns.md` is an optional CTP appendix for trade and market-data session sequencing, recovery, and cancel identity guidance.
+`postgresql-schema-patterns.md` is an optional PostgreSQL appendix for concrete physical schema patterns.
 `example-optionforge.md` is intentionally optional. It is a mapping example, not the default mental model.
 
 ## Maintenance

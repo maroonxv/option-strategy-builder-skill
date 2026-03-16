@@ -13,7 +13,9 @@ CODEX_SKILL_DIR = ROOT / ".codex" / "skills" / "build-option-strategy"
 
 REFERENCE_FILES = (
     "architecture-patterns.md",
+    "ctp-gateway-connection-patterns.md",
     "schema-and-persistence.md",
+    "postgresql-schema-patterns.md",
     "example-optionforge.md",
 )
 
